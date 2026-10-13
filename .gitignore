@@ -1,0 +1,18 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Записи и модели — большие файлы, в git не храним
+test_audio/*
+!test_audio/README.md
+models/
+# Xcode
+xcuserdata/
+DerivedData/
+build/
+app/*.xcodeproj/
+/MadStudio.app/
+engine/runtimes/
+release/build/
+release/*.dmg

@@ -1,0 +1,29 @@
+MadStudio — how to install and open it the first time
+
+1. Drag MadStudio into the Applications folder.
+2. Open MadStudio with a double-click.
+3. macOS may say it can't verify the app (it has no paid Apple signature yet).
+   Click “Done”, then go to:
+   System Settings → Privacy & Security → at the bottom, “MadStudio was blocked…”
+   → “Open Anyway” → enter your Mac password. You only need to do this once.
+
+Requires a Mac with an Apple chip (M1 or newer) and macOS 15 or newer.
+The program downloads neural networks itself the first time they are needed
+(“Neural Network Models”); after that everything works offline — your
+recordings never leave your Mac.
+
+──────────────────────────────────────────────────────────────
+
+MadStudio — как установить и открыть в первый раз
+
+1. Перетащите MadStudio в папку «Программы» (Applications).
+2. Откройте MadStudio двойным щелчком.
+3. macOS может написать, что не удалось проверить программу (у неё пока нет
+   платной подписи Apple). Нажмите «Готово», затем:
+   Системные настройки → Конфиденциальность и безопасность → внизу
+   «MadStudio заблокирована…» → «Всё равно открыть» → введите пароль Mac.
+   Это нужно сделать один раз.
+
+Нужен Mac с чипом Apple (M1 и новее) и macOS 15 или новее.
+Нейросети программа скачивает сама при первом использовании (раздел «Модели»),
+дальше всё работает без интернета — ваши записи никуда не отправляются.

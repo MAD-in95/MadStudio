@@ -1,0 +1,56 @@
+name: MadStudio
+options:
+  bundleIdPrefix: com.madstudio
+  developmentLanguage: ru          # texts are written in Russian; English is the translation
+  deploymentTarget:
+    macOS: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+targets:
+  MadStudio:
+    type: application
+    platform: macOS
+    sources: [MadStudio]
+    info:
+      path: MadStudio/Info.plist
+      properties:
+        CFBundleDisplayName: MadStudio
+        CFBundleDevelopmentRegion: en      # any other system language gets the English interface
+        CFBundleShortVersionString: "0.1"
+        LSApplicationCategoryType: public.app-category.video
+        MadStudioEngineDir: $(MADSTUDIO_ENGINE_DIR)
+        NSMicrophoneUsageDescription: "MadStudio записывает голос с микрофона: ваши записи для проекта и проверочную фразу, которая подтверждает, что голос ваш. Запись остаётся на этом Mac."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.madstudio.app
+        ARCHS: arm64               # the neural network engine runs only on Apple chips
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+        MADSTUDIO_ENGINE_DIR: $(SRCROOT)/../engine
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+  MadStudioTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [MadStudioTests]
+    dependencies:
+      - target: MadStudio
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+schemes:
+  MadStudio:
+    build:
+      targets:
+        MadStudio: all
+    run:
+      config: Debug
+    test:
+      targets: [MadStudioTests]
