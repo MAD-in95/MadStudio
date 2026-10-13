@@ -18,7 +18,7 @@ targets:
       properties:
         CFBundleDisplayName: MadStudio
         CFBundleDevelopmentRegion: en      # any other system language gets the English interface
-        CFBundleShortVersionString: "0.1"
+        CFBundleShortVersionString: "0.2"
         LSApplicationCategoryType: public.app-category.video
         MadStudioEngineDir: $(MADSTUDIO_ENGINE_DIR)
         NSMicrophoneUsageDescription: "MadStudio записывает голос с микрофона: ваши записи для проекта и проверочную фразу, которая подтверждает, что голос ваш. Запись остаётся на этом Mac."

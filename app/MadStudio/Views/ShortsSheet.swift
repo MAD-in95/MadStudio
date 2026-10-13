@@ -98,10 +98,10 @@ struct ShortsSheet: View {
                         Label("На дорожке", systemImage: "scope")
                     }
                     .help("Выделить этот кусок на дорожках")
-                    Button { if let range { state.savePiece(range, name: Shorts.fileName(baseName, number: n + 1, title: moment.title)) } } label: {
+                    Button { if let range { state.savePiece(range, name: Shorts.fileName(baseName, number: n + 1, title: moment.title), title: moment.title) } } label: {
                         Label("Сохранить…", systemImage: "square.and.arrow.down")
                     }
-                    .help("Сохранить кусок отдельным файлом, рядом — субтитры SRT")
+                    .help("Сохранить момент: звук с субтитрами или готовое вертикальное видео для Shorts")
                 }
                 .disabled(range == nil)
                 Spacer()

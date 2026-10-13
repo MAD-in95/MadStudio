@@ -2,7 +2,7 @@
 
 <h1 align="center">MadStudio</h1>
 
-<p align="center"><b>A local AI audio editor for podcasters and video creators.</b><br>
+<p align="center"><b>A free, local alternative to Descript — an AI audio editor for podcasters and video creators.</b><br>
 Edit speech as text, clean up “um”s and pauses, fix slips in your own voice —<br>
 everything runs on your Mac. No cloud, no subscription.</p>
 
@@ -12,13 +12,13 @@ everything runs on your Mac. No cloud, no subscription.</p>
 
 ## What it does
 
-- **Edit by text.** The recording becomes a document with the timing of every word. Delete a word and the sound is cut; click a word to put the cursor there, Space to listen.
+- **Edit by text.** The recording becomes a document with the timing of every word. Delete a word and the sound is cut; click a word to put the cursor there, Space to listen. Find any word or phrase (⌘F) and cut every occurrence at once; fix a misheard word without touching the sound.
 - **Clean up automatically.** Long pauses, breaths, “um”s, clicks, filler words and failed takes are found and removed in one click, with a before/after comparison. Nothing is destroyed: every edit can be undone.
 - **Fix slips in the speaker's own voice.** Select words, type what should have been said, and the phrase is re-voiced in the same voice, with the room sound of the recording around it. Generated pieces are marked purple and carry an inaudible AI watermark.
 - **Consent first.** A voice is used only after its owner reads a random check phrase aloud — the program checks both the words and the voice. Guests' voices need their consent.
-- **Speakers and tracks.** Speakers are recognised automatically and each gets a track. A multitrack timeline with arrow, blade and range tools, music ducked under speech, effects, trackpad zoom.
+- **Speakers and tracks.** Speakers are recognised automatically and each gets a track — and one click makes them equally loud. A multitrack timeline with arrow, blade and range tools, music ducked under speech, effects, trackpad zoom.
 - **Voice processing.** Noise removal, a “radio voice”, background separation (voice vs. music), microphone presets with automatic setup for your voice.
-- **For YouTube.** Chapters with timecodes, titles, description and tags, and moments for Shorts — written by a language model on your Mac.
+- **For YouTube and Shorts.** Chapters with timecodes, titles, description and tags, and the best moments for Shorts — saved as ready 9:16 videos with word-by-word captions. All written by a language model on your Mac.
 - **Export.** MP3/WAV with loudness presets (YouTube −14, podcast −16, radio −23 LUFS), SRT/VTT subtitles that follow the edit, text with or without timecodes.
 - **Translation in the speaker's voice** (experimental): the edited recording is translated phrase by phrase and spoken in the original voice over the original background.
 - **Models like in LM Studio.** Choose, download and update neural networks per task, search Hugging Face within the family the program can run, see whether a model suits your Mac.
@@ -82,15 +82,15 @@ Early beta, developed and tested on a MacBook Air M1 with 8 GB. Planned: a Windo
 
 ## Русский
 
-**MadStudio** — локальный ИИ-аудиоредактор для подкастеров и блогеров. Всё работает на вашем Mac: без облака и подписок.
+**MadStudio** — бесплатная локальная альтернатива Descript: ИИ-аудиоредактор для подкастеров и блогеров. Всё работает на вашем Mac: без облака и подписок.
 
-- **Монтаж по тексту:** запись превращается в документ, удалили слово — вырезался звук.
+- **Монтаж по тексту:** запись превращается в документ, удалили слово — вырезался звук. Поиск ⌘F с «Вырезать все», исправление ослышанных слов без изменения звука.
 - **Чистка в один клик:** паузы, вдохи, «э-э», щелчки, слова-паразиты, неудачные дубли; сравнение «до/после», всё можно вернуть.
 - **Исправление оговорок голосом автора:** выделите слова, напечатайте, как надо, — фраза переозвучится тем же голосом. Сгенерированное помечается фиолетовым и незаметной меткой ИИ.
 - **Только с согласия:** голос используется после того, как его владелец прочитает проверочную фразу.
-- **Спикеры и дорожки:** собеседники определяются сами, многодорожечный монтаж, музыка приглушается под речью.
+- **Спикеры и дорожки:** собеседники определяются сами, громкость выравнивается одной кнопкой, многодорожечный монтаж, музыка приглушается под речью.
 - **Обработка голоса:** шумоподавление, «радиоголос», отделение голоса от музыки, пресеты микрофона с автонастройкой.
-- **Для YouTube:** главы, названия, описание, теги и моменты для Shorts.
+- **Для YouTube и Shorts:** главы, названия, описание, теги и лучшие моменты — сразу готовыми вертикальными видео с субтитрами.
 - **Экспорт:** MP3/WAV с пресетами громкости, субтитры SRT/VTT, текст.
 - **Перевод голосом автора** (эксперимент).
 

@@ -365,6 +365,22 @@
         }
       }
     },
+    "%lld из %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld из %lld"
+          }
+        }
+      }
+    },
     "%lld млн": {
       "localizations": {
         "en": {
@@ -766,6 +782,22 @@
         }
       }
     },
+    "Аудио (MP3) + субтитры SRT": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio (MP3) + SRT subtitles"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Аудио (MP3) + субтитры SRT"
+          }
+        }
+      }
+    },
     "Аудио или видео (из видео возьмём только звук) — всё обрабатывается на этом Mac": {
       "localizations": {
         "en": {
@@ -1086,6 +1118,22 @@
         }
       }
     },
+    "Вернуть все": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore All"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вернуть все"
+          }
+        }
+      }
+    },
     "Вернуть всё как было": {
       "localizations": {
         "en": {
@@ -1130,6 +1178,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Взять текст из файла .txt"
+          }
+        }
+      }
+    },
+    "Видео 9:16 с субтитрами (MP4) — для Shorts, Reels, TikTok": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "9:16 video with captions (MP4) — for Shorts, Reels, TikTok"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видео 9:16 с субтитрами (MP4) — для Shorts, Reels, TikTok"
           }
         }
       }
@@ -1502,6 +1566,22 @@
         }
       }
     },
+    "Выравнивать нечего: у собеседников мало речи, чтобы измерить громкость.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to level: the speakers have too little speech to measure their loudness."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выравнивать нечего: у собеседников мало речи, чтобы измерить громкость."
+          }
+        }
+      }
+    },
     "Вырезать": {
       "localizations": {
         "en": {
@@ -1514,6 +1594,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вырезать"
+          }
+        }
+      }
+    },
+    "Вырезать все": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut All"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вырезать все"
           }
         }
       }
@@ -1534,6 +1630,22 @@
         }
       }
     },
+    "Вырезать из записи все найденные места сразу (⌘Z — вернуть)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut every found place from the recording at once (⌘Z — undo)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вырезать из записи все найденные места сразу (⌘Z — вернуть)"
+          }
+        }
+      }
+    },
     "Вырезать кусок": {
       "localizations": {
         "en": {
@@ -1546,6 +1658,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вырезать кусок"
+          }
+        }
+      }
+    },
+    "Выровнять громкость собеседников": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even Out Speaker Volumes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выровнять громкость собеседников"
           }
         }
       }
@@ -2030,6 +2158,22 @@
         }
       }
     },
+    "Громкость выровнена: %@. Отменить — ⌘Z.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumes evened out: %@. Undo — ⌘Z."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Громкость выровнена: %@. Отменить — ⌘Z."
+          }
+        }
+      }
+    },
     "Громкость клипа": {
       "localizations": {
         "en": {
@@ -2170,6 +2314,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Де-эссер: смягчает свист на «с», «ш», «щ»"
+          }
+        }
+      }
+    },
+    "Делаю видео для Shorts…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Making the Shorts video…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Делаю видео для Shorts…"
           }
         }
       }
@@ -2734,6 +2894,22 @@
         }
       }
     },
+    "Закрыть поиск (Esc)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close search (Esc)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть поиск (Esc)"
+          }
+        }
+      }
+    },
     "Закрыть проект и вернуться к стартовому окну": {
       "localizations": {
         "en": {
@@ -2990,6 +3166,22 @@
         }
       }
     },
+    "Звук не меняется — исправляется только написание: для субтитров, текста и глав. Чтобы слова прозвучали иначе, нужна «Переозвучка» (⌘R).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sound stays the same — only the spelling is fixed: for subtitles, the text and chapters. To make the words sound different, use “Re-voice” (⌘R)."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звук не меняется — исправляется только написание: для субтитров, текста и глав. Чтобы слова прозвучали иначе, нужна «Переозвучка» (⌘R)."
+          }
+        }
+      }
+    },
     "Звуки и эффекты": {
       "localizations": {
         "en": {
@@ -3182,6 +3374,54 @@
         }
       }
     },
+    "Исправить": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исправить"
+          }
+        }
+      }
+    },
+    "Исправить текст": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix Text"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исправить текст"
+          }
+        }
+      }
+    },
+    "Исправить текст (звук не меняется)…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix Text (sound unchanged)…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исправить текст (звук не меняется)…"
+          }
+        }
+      }
+    },
     "Итальянский": {
       "localizations": {
         "en": {
@@ -3263,6 +3503,7 @@
       }
     },
     "Каждый момент сохранится отдельным MP3 с субтитрами SRT": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -3274,6 +3515,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый момент сохранится отдельным MP3 с субтитрами SRT"
+          }
+        }
+      }
+    },
+    "Каждый момент сохранится отдельным файлом с субтитрами": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each moment is saved as its own file with subtitles"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый момент сохранится отдельным файлом с субтитрами"
           }
         }
       }
@@ -4030,6 +4287,38 @@
         }
       }
     },
+    "Найти в тексте": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find in text"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найти в тексте"
+          }
+        }
+      }
+    },
+    "Найти в тексте…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find in Text…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найти в тексте…"
+          }
+        }
+      }
+    },
     "Найти моменты для Shorts": {
       "localizations": {
         "en": {
@@ -4324,6 +4613,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не получилось связаться с Hugging Face. Проверьте интернет."
+          }
+        }
+      }
+    },
+    "Не получилось собрать видео": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t put the video together"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не получилось собрать видео"
           }
         }
       }
@@ -6296,6 +6601,22 @@
         }
       }
     },
+    "Предыдущее (⇧↩)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous (⇧↩)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предыдущее (⇧↩)"
+          }
+        }
+      }
+    },
     "Приглушать под речью": {
       "localizations": {
         "en": {
@@ -7176,6 +7497,22 @@
         }
       }
     },
+    "Следующее (↩)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next (↩)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующее (↩)"
+          }
+        }
+      }
+    },
     "Слишком громко — звук может искажаться. Отодвиньтесь или убавьте микрофон": {
       "localizations": {
         "en": {
@@ -7384,6 +7721,22 @@
         }
       }
     },
+    "Собеседники и так звучат одинаково громко — разница меньше 1 дБ.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The speakers already sound equally loud — less than 1 dB apart."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Собеседники и так звучат одинаково громко — разница меньше 1 дБ."
+          }
+        }
+      }
+    },
     "Согласие подтверждено ранее": {
       "localizations": {
         "en": {
@@ -7481,6 +7834,7 @@
       }
     },
     "Сохранить кусок отдельным файлом, рядом — субтитры SRT": {
+      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -7492,6 +7846,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сохранить кусок отдельным файлом, рядом — субтитры SRT"
+          }
+        }
+      }
+    },
+    "Сохранить момент: звук с субтитрами или готовое вертикальное видео для Shorts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save the moment: sound with subtitles or a ready vertical video for Shorts"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить момент: звук с субтитрами или готовое вертикальное видео для Shorts"
           }
         }
       }
@@ -8712,6 +9082,22 @@
         }
       }
     },
+    "Формат:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format:"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Формат:"
+          }
+        }
+      }
+    },
     "Французский": {
       "localizations": {
         "en": {
@@ -9524,6 +9910,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "на дорожке голоса"
+          }
+        }
+      }
+    },
+    "не найдено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not found"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "не найдено"
           }
         }
       }

@@ -74,14 +74,18 @@ enum Shorts {
 
     /// Subtitles for one stretch of the edited recording, timed from its start.
     static func cues(_ words: [Subtitles.Word], in range: ClosedRange<Double>) -> [Subtitles.Cue] {
-        let inside = words.filter { $0.start >= range.lowerBound - 0.05 && $0.end <= range.upperBound + 0.05 }
+        Subtitles.cues(self.words(words, in: range))
+    }
+
+    /// The words inside a piece, timed from the piece's start.
+    static func words(_ words: [Subtitles.Word], in range: ClosedRange<Double>) -> [Subtitles.Word] {
+        words.filter { $0.start >= range.lowerBound - 0.05 && $0.end <= range.upperBound + 0.05 }
             .map { w -> Subtitles.Word in
                 var w = w
                 w.start = max(0, w.start - range.lowerBound)
                 w.end = min(range.upperBound, w.end) - range.lowerBound
                 return w
             }
-        return Subtitles.cues(inside)
     }
 }
 

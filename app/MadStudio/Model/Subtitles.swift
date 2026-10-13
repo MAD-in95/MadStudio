@@ -44,7 +44,7 @@ enum Subtitles {
                 var i = tokenIndex
                 while i < tokens.count && tokens[i].start < r.end - 0.0005 {
                     let t = tokens[i]
-                    if t.isWord, states[i] == .keep, !replaced.contains(i), let text = t.text,
+                    if t.isWord, states[i] == .keep, !replaced.contains(i), let text = t.text, !text.isEmpty,
                        t.start >= r.start - 0.0005, t.end <= r.end + 0.0005 {
                         out.append(Word(text: text, start: clock + t.start - r.start,
                                         end: clock + t.end - r.start, speaker: t.speaker))

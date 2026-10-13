@@ -214,6 +214,23 @@ struct TimelineView: View {
         .help(help)
     }
 
+    /// Everyone equally loud: sets the speakers' track volumes, tells what changed.
+    private func levelSpeakers() {
+        guard let peaks = waves[project.sourceURL.path] else { return }
+        let gains = project.levelSpeakers(peaks: peaks)
+        if gains.isEmpty {
+            state.infoMessage = String(localized: "Выравнивать нечего: у собеседников мало речи, чтобы измерить громкость.")
+        } else if gains.values.allSatisfy({ abs($0) < 1 }) {
+            state.infoMessage = String(localized: "Собеседники и так звучат одинаково громко — разница меньше 1 дБ.")
+        } else {
+            let lines = gains.keys.sorted().map { n in
+                let g = gains[n] ?? 0
+                return "\(project.speakerName(n)): \(g > 0 ? "+" : g < 0 ? "−" : "")\(Format.decimal(abs(g), digits: 1)) " + String(localized: "дБ")
+            }
+            state.infoMessage = String(localized: "Громкость выровнена: \(lines.joined(separator: ", ")). Отменить — ⌘Z.")
+        }
+    }
+
     private var voiceMenu: some View {
         let fx = project.mix.voice
         let label = fx.isOn
@@ -231,6 +248,11 @@ struct TimelineView: View {
             Toggle("Радиоголос — плотнее и чище", isOn: Binding(
                 get: { fx.radio },
                 set: { v in var f = fx; f.radio = v; Task { await state.setVoiceFX(f, for: project) } }))
+            if project.speakerCount > 1 {
+                Divider()
+                Button("Выровнять громкость собеседников") { levelSpeakers() }
+                    .disabled(waves[project.sourceURL.path] == nil)
+            }
         } label: {
             Label(label, systemImage: "wand.and.rays").lineLimit(1)
         }
@@ -394,7 +416,7 @@ struct TimelineView: View {
         let base = project.sourceURL.deletingPathExtension().lastPathComponent
         if let m = momentRanges.first(where: { abs($0.range.lowerBound - range.lowerBound) < 0.01
                                                && abs($0.range.upperBound - range.upperBound) < 0.01 }) {
-            state.savePiece(range, name: Shorts.fileName(base, number: m.number, title: m.title))
+            state.savePiece(range, name: Shorts.fileName(base, number: m.number, title: m.title), title: m.title)
         } else {
             state.savePiece(range, name: String(localized: "\(base) — кусок \(Int(range.lowerBound))-\(Int(range.upperBound.rounded())) с"))
         }

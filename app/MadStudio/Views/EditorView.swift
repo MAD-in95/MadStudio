@@ -6,6 +6,8 @@ struct EditorView: View {
     @State private var listenEdited = true
     @State private var selection: [Int] = []
     @State private var revoicing: ClosedRange<Int>?
+    /// «Исправить текст»: the words whose spelling is being fixed
+    @State private var correcting: ClosedRange<Int>?
     @State private var translating = false
     @AppStorage("sidebarTab") private var sidebarTab = 0
     @AppStorage("textFontSize") private var fontSize = 17.0
@@ -16,8 +18,88 @@ struct EditorView: View {
     @State private var playingMoment: ClosedRange<Double>?
     /// developer check: voice confirmation opened at launch
     @State private var demoConfirm: SpeakerRef?
+    /// ⌘F
+    @State private var showSearch = false
+    @State private var searchQuery = ""
+    @State private var searchIndex = 0
+
+    private var searchMatches: [ClosedRange<Int>] {
+        showSearch ? TranscriptSearch.matches(searchQuery, in: project.tokens) : []
+    }
 
     private var player: Player { state.player }
+
+    // the sheets for a range of words (split out: one long body is too much for the compiler)
+    private var revoiceItem: Binding<RevoiceRange?> {
+        Binding(get: { revoicing.map { RevoiceRange(range: $0) } }, set: { revoicing = $0?.range })
+    }
+    private var correctItem: Binding<RevoiceRange?> {
+        Binding(get: { correcting.map { RevoiceRange(range: $0) } }, set: { correcting = $0?.range })
+    }
+    private func correctSheet(_ range: ClosedRange<Int>) -> some View {
+        CorrectTextSheet(original: project.shownText(range.lowerBound, range.upperBound)) { text in
+            project.correctText(range.lowerBound, range.upperBound, to: text)
+        }
+    }
+
+    /// The text document with its search bar and text style button.
+    private var transcript: some View {
+        TranscriptView(
+            project: project,
+            revision: project.revision,
+            textStyle: "\(fontName)|\(fontSize)",
+            currentTime: originalTime,
+            isPlaying: player.isPlaying,
+            onClickToken: { playWord(project.tokens[$0].start) },
+            onToggleDelete: { project.toggleDelete($0) },
+            onSetState: { project.setState($0, to: $1) },
+            onSpace: togglePlay,
+            onSelect: { selection = $0 },
+            onRestore: { project.removeReplacement($0) },
+            onTempo: { id, factor in Task { await state.changeTempo(project, replacement: id, factor: factor) } },
+            onPlayToken: { playFromToken($0) },
+            onRevoice: { startRevoice() },
+            onTool: { tool in
+                switch tool {
+                case "clean": project.autoClean()
+                case "stats": state.showStats = true
+                case "shorts": state.findShorts()
+                case "record": state.showRecorder = true
+                case "speak": state.showSpeak = true
+                case "find": showSearch = true
+                case "correct":
+                    if let a = selection.min(), let b = selection.max() { correcting = a...b }
+                default: break
+                }
+            },
+            onAssignSpeaker: { project.assignSpeaker($0, to: $1) },
+            searchMatches: searchMatches,
+            currentMatch: searchMatches.isEmpty ? nil : min(searchIndex, searchMatches.count - 1))
+            .frame(minHeight: 160)
+            .overlay(alignment: .topTrailing) { TextStyleMenu(size: $fontSize, name: $fontName).padding(10) }
+            .overlay(alignment: .top) {
+                if showSearch {
+                    let matches = searchMatches
+                    let indices = matches.flatMap { Array($0) }
+                    SearchBar(query: $searchQuery, count: matches.count, current: $searchIndex,
+                              allCut: !indices.isEmpty && indices.allSatisfy { project.states[$0] != .keep },
+                              onCutAll: { project.toggleDelete(indices) },
+                              onClose: { showSearch = false })
+                        .padding(.top, 10)
+                }
+            }
+            .background {
+                Button("") { showSearch = true }.keyboardShortcut("f").opacity(0)
+            }
+            .onAppear {
+                // developer check: `--search <text>` opens the search with that text
+                let args = CommandLine.arguments
+                if let i = args.firstIndex(of: "--search"), i + 1 < args.count {
+                    searchQuery = args[i + 1]
+                    showSearch = true
+                }
+            }
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -39,34 +121,7 @@ struct EditorView: View {
             .navigationSplitViewColumnWidth(min: 230, ideal: 250)
         } detail: {
             VSplitView {
-                TranscriptView(
-                    project: project,
-                    revision: project.revision,
-                    textStyle: "\(fontName)|\(fontSize)",
-                    currentTime: originalTime,
-                    isPlaying: player.isPlaying,
-                    onClickToken: { playWord(project.tokens[$0].start) },
-                    onToggleDelete: { project.toggleDelete($0) },
-                    onSetState: { project.setState($0, to: $1) },
-                    onSpace: togglePlay,
-                    onSelect: { selection = $0 },
-                    onRestore: { project.removeReplacement($0) },
-                    onTempo: { id, factor in Task { await state.changeTempo(project, replacement: id, factor: factor) } },
-                    onPlayToken: { playFromToken($0) },
-                    onRevoice: { startRevoice() },
-                    onTool: { tool in
-                        switch tool {
-                        case "clean": project.autoClean()
-                        case "stats": state.showStats = true
-                        case "shorts": state.findShorts()
-                        case "record": state.showRecorder = true
-                        case "speak": state.showSpeak = true
-                        default: break
-                        }
-                    },
-                    onAssignSpeaker: { project.assignSpeaker($0, to: $1) })
-                    .frame(minHeight: 160)
-                    .overlay(alignment: .topTrailing) { TextStyleMenu(size: $fontSize, name: $fontName).padding(10) }
+                transcript
                 VStack(spacing: 0) {
                     transportBar
                     Divider()
@@ -128,14 +183,12 @@ struct EditorView: View {
                 .help("Сохранить смонтированную запись (MP3, WAV) или субтитры")
             }
         }
-        .sheet(item: Binding(
-            get: { revoicing.map { RevoiceRange(range: $0) } },
-            set: { revoicing = $0?.range })
-        ) { item in
+        .sheet(item: revoiceItem) { item in
             RevoiceSheet(project: project, first: item.range.lowerBound, last: item.range.upperBound) { text in
                 Task { await state.revoice(project, first: item.range.lowerBound, last: item.range.upperBound, text: text) }
             }
         }
+        .sheet(item: correctItem) { item in correctSheet(item.range) }
         .sheet(isPresented: Binding(get: { state.showStats }, set: { state.showStats = $0 })) {
             StatsSheet(project: project)
         }

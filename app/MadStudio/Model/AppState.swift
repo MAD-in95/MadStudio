@@ -1017,21 +1017,27 @@ final class AppState {
     }
 
     /// Saves one stretch of the edited recording as its own file, with subtitles next to it.
-    func savePiece(_ range: ClosedRange<Double>, name: String) {
+    func savePiece(_ range: ClosedRange<Double>, name: String, title: String? = nil) {
         guard let project else { return }
         let panel = NSSavePanel()
-        panel.allowedContentTypes = [.mp3, .wav]
-        panel.nameFieldStringValue = name + ".mp3"
+        panel.allowedContentTypes = [.mp3, .wav, .mpeg4Movie]
+        let format = Self.formatPicker()
+        panel.nameFieldStringValue = name + (format.video ? ".mp4" : ".mp3")
         panel.message = String(localized: "Кусок \(Format.time(range.lowerBound))–\(Format.time(range.upperBound)) смонтированной записи. Рядом сохранятся субтитры SRT")
         let loudness = Self.loudnessPicker()
-        panel.accessoryView = loudness.view
+        panel.accessoryView = Self.stack([format.view, loudness.view])
+        format.onChange = { video in
+            let base = (panel.nameFieldStringValue as NSString).deletingPathExtension
+            panel.nameFieldStringValue = base + (video ? ".mp4" : ".mp3")
+        }
         guard panel.runModal() == .OK, let output = panel.url else { return }
         let preset = Self.loudnessPresets[loudness.popup.indexOfSelectedItem].id
         UserDefaults.standard.set(preset, forKey: "loudnessPreset")
-        Task { await savePieces([(range, output)], project: project, loudness: preset) }
+        let piece = Piece(range: range, output: output, title: title ?? name)
+        Task { await savePieces([piece], project: project, loudness: preset) }
     }
 
-    /// Saves every moment for Shorts into one folder: audio and subtitles for each.
+    /// Saves every moment for Shorts into one folder: audio and subtitles, or videos, for each.
     func saveAllShorts() {
         guard let project else { return }
         let panel = NSOpenPanel()
@@ -1039,22 +1045,31 @@ final class AppState {
         panel.canChooseFiles = false
         panel.canCreateDirectories = true
         panel.prompt = String(localized: "Сохранить сюда")
-        panel.message = String(localized: "Каждый момент сохранится отдельным MP3 с субтитрами SRT")
+        panel.message = String(localized: "Каждый момент сохранится отдельным файлом с субтитрами")
+        let format = Self.formatPicker()
         let loudness = Self.loudnessPicker()
-        panel.accessoryView = loudness.view
+        panel.accessoryView = Self.stack([format.view, loudness.view])
         guard panel.runModal() == .OK, let folder = panel.url else { return }
         let preset = Self.loudnessPresets[loudness.popup.indexOfSelectedItem].id
         UserDefaults.standard.set(preset, forKey: "loudnessPreset")
         let base = project.sourceURL.deletingPathExtension().lastPathComponent
         let segments = project.segments
-        let jobs = project.shorts.enumerated().compactMap { n, m -> (ClosedRange<Double>, URL)? in
+        let ext = format.video ? "mp4" : "mp3"
+        let jobs = project.shorts.enumerated().compactMap { n, m -> Piece? in
             guard let range = Shorts.edited(m, segments: segments) else { return nil }
-            return (range, folder.appendingPathComponent(Shorts.fileName(base, number: n + 1, title: m.title) + ".mp3"))
+            let file = folder.appendingPathComponent(Shorts.fileName(base, number: n + 1, title: m.title) + "." + ext)
+            return Piece(range: range, output: file, title: m.title)
         }
         Task { await savePieces(jobs, project: project, loudness: preset) }
     }
 
-    private func savePieces(_ jobs: [(ClosedRange<Double>, URL)], project: Project, loudness: String) async {
+    struct Piece {
+        var range: ClosedRange<Double>
+        var output: URL
+        var title: String
+    }
+
+    func savePieces(_ jobs: [Piece], project: Project, loudness: String, reveal: Bool = true) async {
         guard !jobs.isEmpty else { return }
         busyTitle = jobs.count > 1 ? String(localized: "Сохраняю моменты…") : String(localized: "Сохраняю…")
         exportProgress = 0
@@ -1062,17 +1077,59 @@ final class AppState {
         let words = Subtitles.words(tokens: project.tokens, states: project.states,
                                     segments: project.segments, replacements: project.replacements)
         do {
-            for (n, (range, output)) in jobs.enumerated() {
-                try await Pipeline.export(project, to: output, loudness: loudness, range: range) { [weak self] v in
-                    self?.exportProgress = (Double(n) + v) / Double(jobs.count)
+            for (n, job) in jobs.enumerated() {
+                let report = { [weak self] (v: Double) in self?.exportProgress = (Double(n) + v) / Double(jobs.count) }
+                let srt = job.output.deletingPathExtension().appendingPathExtension("srt")
+                try Subtitles.srt(Shorts.cues(words, in: job.range)).write(to: srt, atomically: true, encoding: .utf8)
+                guard job.output.pathExtension.lowercased() == "mp4" else {
+                    try await Pipeline.export(project, to: job.output, loudness: loudness, range: job.range) { report($0) }
+                    continue
                 }
-                let srt = output.deletingPathExtension().appendingPathExtension("srt")
-                try Subtitles.srt(Shorts.cues(words, in: range)).write(to: srt, atomically: true, encoding: .utf8)
+                // video: the sound first, then the picture around it
+                busyTitle = String(localized: "Делаю видео для Shorts…")
+                let sound = FileManager.default.temporaryDirectory.appendingPathComponent("short-\(UUID().uuidString).m4a")
+                defer { try? FileManager.default.removeItem(at: sound) }
+                try await Pipeline.export(project, to: sound, loudness: loudness, range: job.range) { report(0.15 * $0) }
+                try await ShortVideo.make(audio: sound, words: Shorts.words(words, in: job.range), title: job.title,
+                                          to: job.output) { v in Task { @MainActor in report(0.15 + 0.85 * v) } }
             }
-            NSWorkspace.shared.activateFileViewerSelecting(jobs.map(\.1))
+            if reveal { NSWorkspace.shared.activateFileViewerSelecting(jobs.map(\.output)) }
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// "Формат: аудио / видео 9:16" under the file name in the save window.
+    final class FormatPicker: NSObject {
+        let popup = NSPopUpButton(frame: .zero, pullsDown: false)
+        var view: NSView!
+        var onChange: (Bool) -> Void = { _ in }
+        var video: Bool { popup.indexOfSelectedItem == 1 }
+        @objc func changed() {
+            UserDefaults.standard.set(video, forKey: "pieceAsVideo")
+            onChange(video)
+        }
+    }
+
+    static func formatPicker() -> FormatPicker {
+        let picker = FormatPicker()
+        picker.popup.addItems(withTitles: [String(localized: "Аудио (MP3) + субтитры SRT"),
+                                           String(localized: "Видео 9:16 с субтитрами (MP4) — для Shorts, Reels, TikTok")])
+        picker.popup.selectItem(at: UserDefaults.standard.bool(forKey: "pieceAsVideo") ? 1 : 0)
+        picker.popup.target = picker
+        picker.popup.action = #selector(FormatPicker.changed)
+        let stack = NSStackView(views: [NSTextField(labelWithString: String(localized: "Формат:")), picker.popup])
+        stack.edgeInsets = NSEdgeInsets(top: 8, left: 16, bottom: 0, right: 16)
+        picker.view = stack
+        return picker
+    }
+
+    static func stack(_ views: [NSView]) -> NSView {
+        let s = NSStackView(views: views)
+        s.orientation = .vertical
+        s.alignment = .leading
+        s.spacing = 0
+        return s
     }
 
     // MARK: Loudness presets

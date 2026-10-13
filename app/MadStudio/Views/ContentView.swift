@@ -76,14 +76,15 @@ struct ContentView: View {
                 NotificationCenter.default.post(name: .madStudioDemoSelectShort, object: n)
             }
             // `--short-to <file>`: save the first Shorts moment (developer check)
+            if args.contains("--short-to") {
+                for _ in 0..<60 where state.project == nil { try? await Task.sleep(for: .seconds(1)) }
+            }
             if let i = args.firstIndex(of: "--short-to"), i + 1 < args.count, let project = state.project,
                let moment = project.shorts.first, let range = Shorts.edited(moment, segments: project.segments) {
+                // .mp3 — sound and subtitles, .mp4 — the vertical video
                 let output = URL(fileURLWithPath: args[i + 1])
-                try? await Pipeline.export(project, to: output, loudness: "youtube", range: range)
-                let words = Subtitles.words(tokens: project.tokens, states: project.states,
-                                            segments: project.segments, replacements: project.replacements)
-                try? Subtitles.srt(Shorts.cues(words, in: range))
-                    .write(to: output.deletingPathExtension().appendingPathExtension("srt"), atomically: true, encoding: .utf8)
+                await state.savePieces([AppState.Piece(range: range, output: output, title: moment.title)],
+                                       project: project, loudness: "youtube", reveal: false)
             }
             if args.contains("--stats") { state.showStats = true }
             if args.contains("--separate") {

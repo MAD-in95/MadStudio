@@ -21,6 +21,9 @@ struct TranscriptView: NSViewRepresentable {
     var onRevoice: () -> Void = {}
     var onTool: (String) -> Void = { _ in }
     var onAssignSpeaker: ([Int], Int) -> Void = { _, _ in }
+    /// found by ⌘F: all places, and the one shown now
+    var searchMatches: [ClosedRange<Int>] = []
+    var currentMatch: Int?
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -111,6 +114,7 @@ struct TranscriptView: NSViewRepresentable {
             c.rebuild(project: project)
             if firstBuild { textView.scroll(.zero) }
         }
+        c.showSearch(searchMatches, current: currentMatch)
         c.highlight(time: currentTime, follow: isPlaying, tokens: project.tokens)
     }
 
@@ -155,6 +159,11 @@ struct TranscriptView: NSViewRepresentable {
                     hasWords = true
                     continue
                 }
+                if token.isWord, token.text?.isEmpty == true {
+                    // a word removed by a text correction: nothing to show, the sound stays
+                    ranges.append(NSRange(location: text.length, length: 0))
+                    continue
+                }
                 let speakerChanges = showSpeakers && token.isWord && token.speaker != nil
                     && labelled != nil && token.speaker != labelled
                 if text.length > 0 {
@@ -177,6 +186,38 @@ struct TranscriptView: NSViewRepresentable {
             text.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: text.length))
             storage.setAttributedString(text)
             highlighted = nil
+            searchKey = nil   // the text was rebuilt: paint the search results again
+        }
+
+        // MARK: Search (⌘F)
+
+        private var searchKey: String?
+        private var searchRanges: [NSRange] = []
+        private var currentSearch: NSRange?
+
+        private func characters(of match: ClosedRange<Int>) -> NSRange? {
+            guard match.upperBound < ranges.count else { return nil }
+            return NSUnionRange(ranges[match.lowerBound], ranges[match.upperBound])
+        }
+
+        /// Marks every match in the text and scrolls to the current one.
+        func showSearch(_ matches: [ClosedRange<Int>], current: Int?) {
+            let key = "\(matches.map { "\($0.lowerBound)-\($0.upperBound)" }.joined(separator: ","))|\(current ?? -1)"
+            guard key != searchKey, let textView, let layout = textView.layoutManager else { return }
+            searchKey = key
+            for r in searchRanges { layout.removeTemporaryAttribute(.backgroundColor, forCharacterRange: r) }
+            searchRanges = matches.compactMap(characters(of:))
+            currentSearch = current.flatMap { $0 < matches.count ? characters(of: matches[$0]) : nil }
+            for r in searchRanges { paintSearch(r, in: layout) }
+            if let currentSearch {
+                textView.scrollRangeToVisible(currentSearch)
+                textView.showFindIndicator(for: currentSearch)
+            }
+        }
+
+        private func paintSearch(_ range: NSRange, in layout: NSLayoutManager) {
+            let color = range == currentSearch ? Style.searchCurrent : Style.searchFound
+            layout.addTemporaryAttribute(.backgroundColor, value: color, forCharacterRange: range)
         }
 
         var demoObserver: NSObjectProtocol?
@@ -269,6 +310,8 @@ struct TranscriptView: NSViewRepresentable {
             guard index != highlighted else { return }
             if let old = highlighted, old < ranges.count {
                 layout.removeTemporaryAttribute(.backgroundColor, forCharacterRange: ranges[old])
+                // a search result under the word that just stopped playing stays marked
+                for r in searchRanges where NSIntersectionRange(r, ranges[old]).length > 0 { paintSearch(r, in: layout) }
             }
             highlighted = index
             if let index, index < ranges.count {
@@ -317,6 +360,7 @@ final class TokenTextView: NSTextView {
             let deleted = selectionIsDeleted?() ?? false
             add(deleted ? String(localized: "Вернуть") : String(localized: "Вырезать"), "\u{8}") { [weak self] in self?.onDelete?() }
             add(String(localized: "Переозвучить…"), "r", .command) { [weak self] in self?.onRevoice?() }
+            add(String(localized: "Исправить текст (звук не меняется)…")) { [weak self] in self?.onTool?("correct") }
             if !speakers.isEmpty {
                 let sub = NSMenu()
                 for (i, name) in speakers.enumerated() {
@@ -331,6 +375,7 @@ final class TokenTextView: NSTextView {
             }
             add(String(localized: "Копировать текст"), "c", .command) { [weak self] in self?.copy(nil) }
         }
+        add(String(localized: "Найти в тексте…"), "f", .command) { [weak self] in self?.onTool?("find") }
         menu.addItem(.separator())
         add(String(localized: "Почистить автоматически")) { [weak self] in self?.onTool?("clean") }
         add(String(localized: "Статистика речи")) { [weak self] in self?.onTool?("stats") }
@@ -416,6 +461,8 @@ enum Style {
     static var markerFont: NSFont { NSFont.systemFont(ofSize: max(10, fontSize * 0.7), weight: .medium) }
     static var word: [NSAttributedString.Key: Any] { [.font: font, .foregroundColor: Theme.text] }
     static let playing = Theme.rgb(0xFF5A1F, alpha: 0.3)
+    static let searchFound = Theme.rgb(0x4EA1FF, alpha: 0.28)
+    static let searchCurrent = Theme.rgb(0x4EA1FF, alpha: 0.65)
     static let pauseColor = Theme.rgb(0x8D8A96)
     static let soundColor = Theme.rgb(0x6FD4E0)
     static let unclearColor = Theme.rgb(0xE8C547)

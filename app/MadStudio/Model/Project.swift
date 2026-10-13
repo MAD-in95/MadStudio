@@ -37,7 +37,10 @@ final class Project {
         var mix: Mix
         var speakerOverrides: [Int: Int]
         var arrangement: Arrangement
+        var textFixes: [Int: String]
     }
+    /// true while the saved edits are being read: nothing is written back half-loaded
+    @ObservationIgnored private var loading = true
     private var undoStack: [Snapshot] = []
     private var redoStack: [Snapshot] = []
 
@@ -45,6 +48,8 @@ final class Project {
     private(set) var tokens: [Token] = []
     /// token index -> speaker, set by hand when automatic speaker detection was wrong
     private(set) var speakerOverrides: [Int: Int] = [:]
+    /// word index -> corrected text (a misheard word, a name); the sound stays as it is
+    private(set) var textFixes: [Int: String] = [:]
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
 
@@ -327,6 +332,7 @@ final class Project {
         var speakerOverrides: [Int: Int]?
         var consents: [Int: VoiceConsent]?
         var arrangement: Arrangement?
+        var textFixes: [Int: String]?
     }
 
     init(sourceURL: URL, transcript: Transcript, folder: URL) {
@@ -346,17 +352,20 @@ final class Project {
             speakerOverrides = saved.speakerOverrides ?? [:]
             consents = saved.consents ?? [:]
             arrangement = saved.arrangement ?? Arrangement()
+            textFixes = saved.textFixes ?? [:]
         } else {
             states = Array(repeating: .keep, count: transcript.tokens.count)
             options = CleanOptions()
         }
-        tokens = Self.applying(speakerOverrides, to: transcript.tokens)
+        tokens = Self.applying(speakerOverrides, textFixes, to: transcript.tokens)
+        loading = false
     }
 
-    private static func applying(_ overrides: [Int: Int], to tokens: [Token]) -> [Token] {
-        guard !overrides.isEmpty else { return tokens }
+    private static func applying(_ overrides: [Int: Int], _ fixes: [Int: String], to tokens: [Token]) -> [Token] {
+        guard !overrides.isEmpty || !fixes.isEmpty else { return tokens }
         var out = tokens
         for (i, speaker) in overrides where i < out.count { out[i].speaker = speaker }
+        for (i, text) in fixes where i < out.count { out[i].text = text }
         return out
     }
 
@@ -369,6 +378,30 @@ final class Project {
     }
 
     // MARK: Editing
+
+    /// Fixes what the transcript says without touching the sound — a misheard word, a name.
+    /// The new words take the places of the old ones in order, so each keeps its timing (and
+    /// the subtitles stay in step); extra new words join the last place, missing ones leave
+    /// their places empty.
+    func correctText(_ first: Int, _ last: Int, to text: String) {
+        let places = (first...last).filter { transcript.tokens[$0].isWord }
+        guard !places.isEmpty else { return }
+        var words = text.split(whereSeparator: \.isWhitespace).map(String.init)
+        if words.count > places.count {
+            words = Array(words[..<(places.count - 1)]) + [words[(places.count - 1)...].joined(separator: " ")]
+        }
+        record { s in
+            for (k, i) in places.enumerated() {
+                let new = k < words.count ? words[k] : ""
+                s.textFixes[i] = new == transcript.tokens[i].text ? nil : new
+            }
+        }
+    }
+
+    /// The text of these tokens as it is shown now (corrections included).
+    func shownText(_ first: Int, _ last: Int) -> String {
+        tokens[first...last].filter(\.isWord).compactMap(\.text).filter { !$0.isEmpty }.joined(separator: " ")
+    }
 
     /// Deletes the tokens, or brings them back if all of them were already deleted.
     func toggleDelete(_ indices: [Int]) {
@@ -424,7 +457,7 @@ final class Project {
 
     private var current: Snapshot {
         Snapshot(states: states, replacements: replacements, mix: mix, speakerOverrides: speakerOverrides,
-                 arrangement: arrangement)
+                 arrangement: arrangement, textFixes: textFixes)
     }
 
     private func change(_ body: (inout [TokenState]) -> Void) {
@@ -446,9 +479,10 @@ final class Project {
             || next.arrangement != arrangement {
             contentRevision += 1
         }
-        if next.speakerOverrides != speakerOverrides {
+        if next.speakerOverrides != speakerOverrides || next.textFixes != textFixes {
             speakerOverrides = next.speakerOverrides
-            tokens = Self.applying(speakerOverrides, to: transcript.tokens)
+            textFixes = next.textFixes
+            tokens = Self.applying(speakerOverrides, textFixes, to: transcript.tokens)
         }
         states = next.states
         replacements = next.replacements
@@ -459,10 +493,14 @@ final class Project {
     }
 
     private func save() {
+        // `options` and `voiceConsent` save when they change — also while init fills them in,
+        // which used to write the edits back before names, volumes and the rest were read
+        guard !loading else { return }
         let edits = Edits(states: states, options: options, replacements: replacements,
                           voiceConsent: voiceConsent, speakerNames: speakerNames, mix: mix,
                           speakerOverrides: speakerOverrides, consents: consents,
-                          arrangement: arrangement.isEmpty ? nil : arrangement)
+                          arrangement: arrangement.isEmpty ? nil : arrangement,
+                          textFixes: textFixes.isEmpty ? nil : textFixes)
         if let data = try? JSONEncoder().encode(edits) {
             try? data.write(to: folder.appendingPathComponent("edits.json"))
         }

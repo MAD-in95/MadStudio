@@ -16,3 +16,6 @@ app/*.xcodeproj/
 engine/runtimes/
 release/build/
 release/*.dmg
+promo/build/
+promo/*.mp4
+promo/варианты музыки/
